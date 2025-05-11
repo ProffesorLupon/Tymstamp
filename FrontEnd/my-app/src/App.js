@@ -1,23 +1,53 @@
-// App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './HomePage'; // Add this import
-import Login from './login'; // Login component
-import AdminDashboard from './admindashboard'; // Admin Dashboard
-import Dashboard from './Dashboard'; // Employee Dashboard
-import ClockInOutGPS from './pages/ClockInOutGPS'; // Import GPS Clock In/Out page
+import HomePage from './HomePage';
+import Login from './login';
+import AdminDashboard from './admindashboard';
+import Dashboard from './Dashboard';
+import ClockInOutGPS from './pages/ClockInOutGPS';
+import LeaveRequests from './pages/LeaveRequests';
+import ProtectedRoute from './ProtectedRoute';
+import { AuthProvider } from './AuthContext';
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<HomePage />} />            {/* Show HomePage first */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/admindashboard" element={<AdminDashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/clock-in-out-gps" element={<ClockInOutGPS />} /> {/* Add route for GPS Clock In/Out */}
-      </Routes>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Routes>
+        <Route path="/leave-requests" element={<LeaveRequests />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          
+          <Route
+            path="/admindashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/clock-in-out-gps"
+            element={
+              <ProtectedRoute>
+                <ClockInOutGPS />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 };
 

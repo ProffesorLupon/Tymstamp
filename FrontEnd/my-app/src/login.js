@@ -1,23 +1,26 @@
-// login.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './App.css'; // Import the necessary CSS
+import { useAuth } from './AuthContext';
+import './App.css';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth(); // use login from context
 
   const handleLogin = (e) => {
     e.preventDefault();
-    // Login check for admin credentials
+
     if (username === 'admin' && password === 'admin') {
-      navigate('/admindashboard', { state: { username } }); // Redirect to AdminDashboard with username
+      login(username, 'admin');
+      navigate('/admindashboard');
     } else if (username === 'employee' && password === 'employee') {
-      navigate('/dashboard', { state: { username } }); // Redirect to Employee Dashboard with username
+      login(username, 'employee');
+      navigate('/dashboard');
     } else {
-      setError('Invalid credentials. Try admin/admin or employee/employee.'); // Error message on invalid login
+      setError('Invalid credentials. Try admin/admin or employee/employee.');
     }
   };
 
@@ -25,7 +28,7 @@ const Login = () => {
     <div className="login-page">
       <div className="login-container">
         <h2>Login</h2>
-                {error && <div className="error">{error}</div>}
+        {error && <div className="error">{error}</div>}
         <form onSubmit={handleLogin}>
           <input
             type="text"
