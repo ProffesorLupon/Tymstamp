@@ -367,6 +367,7 @@ body {
 }
 
 /* Leave Request Form */
+/* Leave Request Form */
 .leave-request {
   background-color: rgba(255, 255, 255, 0.05);
   padding: 2rem;
@@ -396,15 +397,17 @@ body {
   color: #ccc;
 }
 
+/* Matching Travel Logs input styles */
 .leave-request input,
 .leave-request textarea,
 .leave-request select {
   width: 100%;
-  padding: 0.8rem;
-  border-radius: 8px;
+  margin: 1rem 0;
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
   background-color: rgba(255, 255, 255, 0.1);
+  border: 2px solid #00cec9;
   color: black !important;
-  border: 2px solid transparent;
   transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
@@ -413,10 +416,11 @@ body {
   color: #555;
 }
 
+/* Focus state matching Travel Logs */
 .leave-request input:focus,
 .leave-request textarea:focus,
 .leave-request select:focus {
-  border-color: #00cec9;
+  border-color: #00b894;
   background-color: rgba(0, 204, 201, 0.1);
   outline: none;
 }
@@ -426,15 +430,15 @@ body {
   min-height: 100px;
 }
 
+/* Matching Travel Logs button style */
 .leave-request button {
   width: 100%;
-  padding: 0.9rem;
+  padding: 0.8rem 1.5rem;
   background-color: #00cec9;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   color: white !important;
   font-weight: bold;
-  font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 1rem;

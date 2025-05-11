@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { FaClock, FaUsers, FaCalendar, FaCalendarCheck, FaSignOutAlt, FaBell } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { FaClock, FaCalendarCheck, FaSignOutAlt, FaBell } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './App.css';
 
 const Dashboard = ({ isAdmin }) => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
+  const navigate = useNavigate();
 
   const [attendanceData, setAttendanceData] = useState([]);
   const [travelLogs, setTravelLogs] = useState([]);
@@ -133,7 +133,7 @@ const Dashboard = ({ isAdmin }) => {
   };
 
   const handleLogout = () => {
-    navigate('/'); // Redirect to homepage when logout is clicked
+    navigate('/');
   };
 
   return (
@@ -148,7 +148,6 @@ const Dashboard = ({ isAdmin }) => {
       </div>
 
       <div className="dashboard-content">
-        {/* Clock In/Out */}
         <div className="clock-in-out">
           <h3>Clock In/Out</h3>
           <p>{isClockedIn ? `Clocked In at: ${clockInTime}` : 'Not Clocked In'}</p>
@@ -161,7 +160,6 @@ const Dashboard = ({ isAdmin }) => {
           </button>
         </div>
 
-        {/* Attendance Logs */}
         <div className="section attendance">
           <h3>Attendance Logs</h3>
           <table className="table table-bordered">
@@ -192,40 +190,22 @@ const Dashboard = ({ isAdmin }) => {
           </table>
         </div>
 
-        {/* Travel Logs */}
         <div className="section travel-logs">
           <h3>Travel Logs</h3>
           <form onSubmit={handleTravelLogSubmit}>
             <div>
               <label>Distance (km):</label>
-              <input
-                type="number"
-                value={distance}
-                onChange={(e) => setDistance(e.target.value)}
-                required
-              />
+              <input type="number" value={distance} onChange={(e) => setDistance(e.target.value)} required />
             </div>
             <div>
               <label>Fuel Cost:</label>
-              <input
-                type="number"
-                value={fuelCost}
-                onChange={(e) => setFuelCost(e.target.value)}
-                required
-              />
+              <input type="number" value={fuelCost} onChange={(e) => setFuelCost(e.target.value)} required />
             </div>
             <div>
               <label>Toll Cost:</label>
-              <input
-                type="number"
-                value={tollCost}
-                onChange={(e) => setTollCost(e.target.value)}
-                required
-              />
+              <input type="number" value={tollCost} onChange={(e) => setTollCost(e.target.value)} required />
             </div>
-            <button type="submit" className="btn btn-primary">
-              Add Travel Log
-            </button>
+            <button type="submit" className="btn btn-primary">Add Travel Log</button>
           </form>
           <table className="table table-bordered">
             <thead>
@@ -238,9 +218,7 @@ const Dashboard = ({ isAdmin }) => {
             </thead>
             <tbody>
               {travelLogs.length === 0 ? (
-                <tr>
-                  <td colSpan="4">No travel logs</td>
-                </tr>
+                <tr><td colSpan="4">No travel logs</td></tr>
               ) : (
                 travelLogs.map((log) => (
                   <tr key={log.id}>
@@ -255,17 +233,12 @@ const Dashboard = ({ isAdmin }) => {
           </table>
         </div>
 
-        {/* Leave Requests */}
         <div className="section leave-requests">
           <h3>Leave Requests</h3>
           <form onSubmit={handleLeaveRequestSubmit}>
             <div>
               <label>Leave Type:</label>
-              <select
-                value={leaveType}
-                onChange={(e) => setLeaveType(e.target.value)}
-                required
-              >
+              <select value={leaveType} onChange={(e) => setLeaveType(e.target.value)} required>
                 <option value="">Select Leave Type</option>
                 <option value="Sick">Sick</option>
                 <option value="Vacation">Vacation</option>
@@ -274,33 +247,17 @@ const Dashboard = ({ isAdmin }) => {
             </div>
             <div>
               <label>Start Date:</label>
-              <input
-                type="date"
-                value={leaveStartDate}
-                onChange={(e) => setLeaveStartDate(e.target.value)}
-                required
-              />
+              <input type="date" value={leaveStartDate} onChange={(e) => setLeaveStartDate(e.target.value)} required />
             </div>
             <div>
               <label>End Date:</label>
-              <input
-                type="date"
-                value={leaveEndDate}
-                onChange={(e) => setLeaveEndDate(e.target.value)}
-                required
-              />
+              <input type="date" value={leaveEndDate} onChange={(e) => setLeaveEndDate(e.target.value)} required />
             </div>
             <div>
               <label>Reason:</label>
-              <textarea
-                value={leaveReason}
-                onChange={(e) => setLeaveReason(e.target.value)}
-                required
-              />
+              <textarea value={leaveReason} onChange={(e) => setLeaveReason(e.target.value)} required />
             </div>
-            <button type="submit" className="btn btn-primary">
-              Submit Leave Request
-            </button>
+            <button type="submit" className="btn btn-primary">Submit Leave Request</button>
           </form>
           <table className="table table-bordered">
             <thead>
@@ -322,18 +279,8 @@ const Dashboard = ({ isAdmin }) => {
                   <td>
                     {isAdmin && request.status === 'Pending' && (
                       <>
-                        <button
-                          onClick={() => handleApproveLeave(request.id)}
-                          className="btn btn-success"
-                        >
-                          Approve
-                        </button>
-                        <button
-                          onClick={() => handleDenyLeave(request.id)}
-                          className="btn btn-danger"
-                        >
-                          Deny
-                        </button>
+                        <button onClick={() => handleApproveLeave(request.id)} className="btn btn-success">Approve</button>
+                        <button onClick={() => handleDenyLeave(request.id)} className="btn btn-danger">Deny</button>
                       </>
                     )}
                   </td>
@@ -343,12 +290,8 @@ const Dashboard = ({ isAdmin }) => {
           </table>
         </div>
 
-        {/* Notifications */}
         <div className="notification-btn">
-          <button
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="btn btn-info"
-          >
+          <button onClick={() => setShowNotifications(!showNotifications)} className="btn btn-info">
             <FaBell /> Notifications
           </button>
           {showNotifications && (
@@ -370,16 +313,11 @@ const Dashboard = ({ isAdmin }) => {
           )}
         </div>
 
-        {/* Quick Links */}
         <div className="quick-links">
           <h3>Quick Links</h3>
           <ul>
-            <li>
-              <FaClock /> Clock In/Out
-            </li>
-            <li>
-              <FaCalendarCheck /> View Attendance Summary
-            </li>
+            <li><FaClock /> Clock In/Out</li>
+            <li><FaCalendarCheck /> View Attendance Summary</li>
           </ul>
         </div>
       </div>

@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaClock, FaUsers, FaCalendar, FaCalendarCheck, FaSignOutAlt } from 'react-icons/fa';
+import {FaUsers, FaCalendar, FaCalendarCheck, FaSignOutAlt } from 'react-icons/fa';
 import './App.css'; // Import App.css for styling
+
+// Simulated API call to fetch leave requests
+const fetchLeaveRequests = async () => {
+  // Simulate a delay
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve([
+        { id: 1, user: 'John Doe', type: 'Sick Leave', status: 'Pending' },
+        { id: 2, user: 'Jane Smith', type: 'Annual Leave', status: 'Approved' },
+        { id: 3, user: 'Bob Brown', type: 'Casual Leave', status: 'Rejected' },
+      ]);
+    }, 1000); // 1-second delay
+  });
+};
 
 const AdminDashboard = () => {
   const [attendanceData, setAttendanceData] = useState([]);
@@ -10,14 +24,23 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
+  const [loadingLeaves, setLoadingLeaves] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Simulating fetching data from the backend (empty for now)
-    setAttendanceData([]);
-    setTravelLogs([]);
-    setLeaveRequests([]);
-    setUsers([]);
+    const fetchData = async () => {
+      setLoadingLeaves(true);
+      const fetchedLeaves = await fetchLeaveRequests();
+      setLeaveRequests(fetchedLeaves);
+      setLoadingLeaves(false);
+
+      // Simulate other data fetching
+      setAttendanceData([]);
+      setTravelLogs([]);
+      setUsers([]);
+    };
+
+    fetchData();
   }, []);
 
   // Handle leave request approval
@@ -33,7 +56,7 @@ const AdminDashboard = () => {
   const handleDenyLeave = (id) => {
     setLeaveRequests((prevRequests) =>
       prevRequests.map((request) =>
-        request.id === id ? { ...request, status: 'Denied' } : request
+        request.id === id ? { ...request, status: 'Rejected' } : request
       )
     );
   };
@@ -140,47 +163,51 @@ const AdminDashboard = () => {
         {/* Leave Requests */}
         <div className="section leave-requests">
           <h3>Leave Requests</h3>
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Leave Type</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaveRequests.length === 0 ? (
-                <tr><td colSpan="4">No leave requests available</td></tr>
-              ) : (
-                leaveRequests.map((request) => (
-                  <tr key={request.id}>
-                    <td>{request.user}</td>
-                    <td>{request.type}</td>
-                    <td>{request.status}</td>
-                    <td>
-                      {request.status === 'Pending' && (
-                        <>
-                          <button
-                            onClick={() => handleApproveLeave(request.id)}
-                            className="btn btn-success"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleDenyLeave(request.id)}
-                            className="btn btn-danger"
-                          >
-                            Deny
-                          </button>
-                        </>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          {loadingLeaves ? (
+            <p>Loading leave requests...</p>
+          ) : (
+            <table className="custom-table">
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Leave Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leaveRequests.length === 0 ? (
+                  <tr><td colSpan="4">No leave requests available</td></tr>
+                ) : (
+                  leaveRequests.map((request) => (
+                    <tr key={request.id}>
+                      <td>{request.user}</td>
+                      <td>{request.type}</td>
+                      <td>{request.status}</td>
+                      <td>
+                        {request.status === 'Pending' && (
+                          <>
+                            <button
+                              onClick={() => handleApproveLeave(request.id)}
+                              className="btn btn-success"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleDenyLeave(request.id)}
+                              className="btn btn-danger"
+                            >
+                              Deny
+                            </button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Manage Users */}
