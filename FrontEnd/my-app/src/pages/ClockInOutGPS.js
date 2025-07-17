@@ -1,125 +1,168 @@
 import React, { useState, useEffect } from 'react';
-import '../App.css'; // Corrected path to App.css
+import apiService from '../api/apiService';
+import FacialRecognitionModal from '../components/FacialRecognitionModal';
+import '../App.css';
+
+const Modal = ({ message, onClose }) => {
+  if (!message) return null;
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-content">
+        <p>{message}</p>
+        <button onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+};
 
 const ClockInOutGPS = () => {
+  const [todaysAttendance, setTodaysAttendance] = useState(null);
   const [isClockedIn, setIsClockedIn] = useState(false);
-  const [clockInOutLog, setClockInOutLog] = useState([
-    { employee: 'John Doe', clockIn: '2025-05-07 08:00 AM', clockOut: '2025-05-07 05:00 PM', status: 'Clocked Out', clockInLocation: null, clockOutLocation: '40.7128,-74.0060' },
-    { employee: 'Jane Smith', clockIn: '2025-05-07 09:00 AM', clockOut: null, status: 'Clocked In', clockInLocation: '34.0522,-118.2437', clockOutLocation: null }
-  ]);
   const [error, setError] = useState(null);
-  const [currentPosition, setCurrentPosition] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [modalMessage, setModalMessage] = useState('');
+  
+  // State to control the new facial recognition modal
+  const [isFaceModalOpen, setIsFaceModalOpen] = useState(false);
 
-  const getCurrentPosition = () => {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation is not supported by your browser'));
+  const fetchTodaysAttendance = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data } = await apiService.get('/attendance/today');
+      
+      if (data && data.id && data.clock_in_time) {
+        setTodaysAttendance(data);
+        setIsClockedIn(!data.clock_out_time);
       } else {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const coords = position.coords.latitude + ',' + position.coords.longitude;
-            resolve(coords);
-          },
-          (err) => {
-            reject(err);
-          }
-        );
+        setTodaysAttendance(null);
+        setIsClockedIn(false);
       }
-    });
+    } catch (err) {
+      console.error("Failed to fetch today's attendance:", err);
+      setTodaysAttendance(null);
+      setIsClockedIn(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    // Get current position on component mount
-    getCurrentPosition()
-      .then((coords) => setCurrentPosition(coords))
-      .catch((err) => setError('Failed to get GPS location: ' + err.message));
+    fetchTodaysAttendance();
   }, []);
 
-  const handleClockIn = async () => {
+  /**
+   * This function is called AFTER the face has been captured.
+   * It receives the captured image and sends it to the backend.
+   * @param {string} faceImage - The base64 encoded image data from the camera.
+   */
+  const handleClockInWithFace = async (faceImage) => {
+    setLoading(true);
+    setError(null);
     try {
-      const location = await getCurrentPosition();
-      const newLog = {
-        employee: 'Admin', // You can dynamically assign this
-        clockIn: new Date().toLocaleString(),
-        clockOut: null,
-        status: 'Clocked In',
-        clockInLocation: location,
-        clockOutLocation: null
-      };
-      setClockInOutLog([...clockInOutLog, newLog]);
-      setIsClockedIn(true);
-      setError(null);
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
+      });
+      const { latitude, longitude } = position.coords;
+
+      // In the future, this will call a new verification endpoint.
+      // For now, it calls the original clock-in endpoint.
+      await apiService.post('/attendance/clock-in', { 
+        latitude, 
+        longitude,
+        face_image: faceImage // The captured image is sent with the request
+      });
+
+      setModalMessage('Successfully clocked in!');
+      fetchTodaysAttendance();
+
     } catch (err) {
-      setError('Failed to get GPS location: ' + err.message);
+      handleApiError(err, 'in');
     }
   };
 
+  
+  //  Handles the clock-out process, which does not require facial recognition.
+   
   const handleClockOut = async () => {
+    setLoading(true);
+    setError(null);
     try {
-      const location = await getCurrentPosition();
-      const updatedLogs = clockInOutLog.map(log => {
-        if (log.status === 'Clocked In' && !log.clockOut) {
-          log.clockOut = new Date().toLocaleString();
-          log.status = 'Clocked Out';
-          log.clockOutLocation = location;
-        }
-        return log;
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
       });
-      setClockInOutLog(updatedLogs);
-      setIsClockedIn(false);
-      setError(null);
+      const { latitude, longitude } = position.coords;
+      
+      await apiService.post('/attendance/clock-out', { latitude, longitude });
+      setModalMessage('Successfully clocked out!');
+      fetchTodaysAttendance();
     } catch (err) {
-      setError('Failed to get GPS location: ' + err.message);
+      handleApiError(err, 'out');
     }
+  };
+
+  /**
+   * Centralized error handler for API calls.
+   * @param {Error} err - The error object.
+   * @param {string} type - 'in' or 'out'.
+   */
+  const handleApiError = (err, type) => {
+    let errorMessage = `Failed to clock ${type}.`;
+    if (err.code && err.code === err.PERMISSION_DENIED) {
+        errorMessage = "Geolocation permission denied. Please enable location services.";
+    } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+    }
+    setError(errorMessage);
+    console.error(`Clock-${type} failed:`, err);
+    setLoading(false);
+  };
+
+  const getStatusMessage = () => {
+      if (loading) return "Loading status...";
+      if (isClockedIn && todaysAttendance) {
+          return `Clocked In at ${new Date(todaysAttendance.clock_in_time).toLocaleTimeString()}`;
+      }
+      return "Clocked Out";
   };
 
   return (
-    <div className="clock-in-out">
-      <div className="clock-header">
-        <h3>GPS-based Clock In / Clock Out</h3>
-        <p style={{ color: '#000000', fontWeight: 'bold' }}>Manage employee attendance with GPS location</p>
-        {currentPosition && <p style={{ color: '#000000', fontWeight: 'bold' }}>Your current location: {currentPosition}</p>}
-      </div>
+    <>
+      <style>{/* The existing modal styles remain here */}</style>
+      <Modal message={modalMessage} onClose={() => setModalMessage('')} />
 
-      {error && <div className="error-message">{error}</div>}
+      {/* The new Facial Recognition Modal */}
+      <FacialRecognitionModal
+        isOpen={isFaceModalOpen}
+        onClose={() => setIsFaceModalOpen(false)}
+        onCapture={handleClockInWithFace}
+      />
 
-      <div className="clock-status">
-        <p>{isClockedIn ? 'You are clocked in. Please clock out at the end of your shift.' : 'Please clock in to start your shift.'}</p>
-      </div>
+      <div className="clock-in-out">
+        <div className="clock-status">
+            <p><strong>Current Status:</strong> {getStatusMessage()}</p>
+        </div>
 
-      <div className="clock-buttons">
-        <button onClick={handleClockIn} className="clock-btn" disabled={isClockedIn}>Clock In</button>
-        <button onClick={handleClockOut} className="clock-btn" disabled={!isClockedIn}>Clock Out</button>
-      </div>
+        {error && <div className="error">{error}</div>}
 
-      <div className="clock-log">
-        <h4>Clock In / Out Log</h4>
-        <table className="log-table">
-          <thead>
-            <tr>
-              <th>Employee</th>
-              <th>Clock In</th>
-              <th>Clock In Location</th>
-              <th>Clock Out</th>
-              <th>Clock Out Location</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clockInOutLog.map((log, index) => (
-              <tr key={index}>
-                <td>{log.employee}</td>
-                <td>{log.clockIn}</td>
-                <td>{log.clockInLocation || 'N/A'}</td>
-                <td>{log.clockOut || 'N/A'}</td>
-                <td>{log.clockOutLocation || 'N/A'}</td>
-                <td>{log.status}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="clock-buttons">
+          <button 
+            onClick={isClockedIn ? handleClockOut : () => setIsFaceModalOpen(true)} 
+            className={`clock-btn-enhanced ${isClockedIn ? 'out' : 'in'}`} 
+            disabled={loading || (todaysAttendance && todaysAttendance.clock_out_time)}
+          >
+            {loading ? 'Processing...' : (isClockedIn ? 'Clock Out' : 'Clock In')}
+          </button>
+        </div>
+
+        {todaysAttendance && todaysAttendance.clock_out_time && (
+            <p style={{marginTop: '1.5rem', color: '#00cec9', textAlign: 'center'}}>
+              You have already clocked in and out for today.
+            </p>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

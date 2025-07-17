@@ -1,26 +1,33 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import './App.css';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth(); // use login from context
+  const { login } = useAuth();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    if (username === 'admin' && password === 'admin') {
-      login(username, 'admin');
-      navigate('/admindashboard');
-    } else if (username === 'employee' && password === 'employee') {
-      login(username, 'employee');
-      navigate('/dashboard');
-    } else {
-      setError('Invalid credentials. Try admin/admin or employee/employee.');
+    try {
+      const user = await login(email, password);
+      if (user.role === 'admin' || user.role === 'manager') {
+        navigate('/admindashboard');
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (err) {
+      setError('Invalid credentials. Please try again.');
+      console.error('Login failed:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -31,19 +38,28 @@ const Login = () => {
         {error && <div className="error">{error}</div>}
         <form onSubmit={handleLogin}>
           <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
         </form>
+        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+          <Link to="/forgot-password" style={{ textDecoration: 'none', color: '#00b894' }}>
+            Forgot Password?
+          </Link>
+        </div>
       </div>
     </div>
   );

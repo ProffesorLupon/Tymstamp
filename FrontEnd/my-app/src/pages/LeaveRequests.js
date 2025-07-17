@@ -1,77 +1,82 @@
 import React, { useEffect, useState } from 'react';
-
-// Placeholder API function to fetch leave requests (replace with your actual API call)
-const fetchLeaveRequests = async () => {
-  // Simulating an API call with a delay
-  return [
-    { id: 1, user: 'John Doe', type: 'Sick Leave', status: 'Pending' },
-    { id: 2, user: 'Jane Smith', type: 'Annual Leave', status: 'Approved' },
-    { id: 3, user: 'Bob Brown', type: 'Casual Leave', status: 'Rejected' },
-  ];
-};
+import apiService from '../api/apiService';
+import '../Dashboard.css';
 
 const LeaveRequests = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch leave requests from the "API" when the component mounts
   useEffect(() => {
     const getLeaveRequests = async () => {
-      const data = await fetchLeaveRequests();
-      setLeaveRequests(data);
-      setLoading(false);
+      setLoading(true);
+      try {
+        const response = await apiService.get('/manager/leave/pending-requests');
+        setLeaveRequests(response.data);
+      } catch (error) {
+        console.error("Failed to fetch leave requests:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     getLeaveRequests();
   }, []);
 
-  // Handle approval or rejection of leave requests
-  const handleStatusChange = (id, newStatus) => {
-    setLeaveRequests(prevState =>
-      prevState.map((request) =>
-        request.id === id ? { ...request, status: newStatus } : request
-      )
-    );
+  const handleApprove = async (id) => {
+    try {
+      await apiService.post(`/manager/leave/requests/${id}/approve`);
+      setLeaveRequests(prev => prev.filter(req => req.id !== id));
+      alert('Request approved.');
+    } catch (error) {
+      console.error('Failed to approve request:', error);
+      alert('Could not approve request.');
+    }
+  };
+
+  const handleReject = async (id) => {
+    const reason = prompt("Please provide a reason for rejection:");
+    if (!reason) return;
+
+    try {
+      await apiService.post(`/manager/leave/requests/${id}/reject`, { rejection_reason: reason });
+      setLeaveRequests(prev => prev.filter(req => req.id !== id));
+      alert('Request rejected.');
+    } catch (error) {
+      console.error('Failed to reject request:', error);
+      alert('Could not reject request.');
+    }
   };
 
   return (
-    <div className="page-container">
-      <h2>Leave Requests</h2>
+    <>
       {loading ? (
         <p>Loading leave requests...</p>
       ) : (
-        <table className="custom-table">
+        <table className="table table-bordered">
           <thead>
             <tr>
-              <th>User</th>
+              <th>Employee</th>
               <th>Leave Type</th>
+              <th>Dates</th>
+              <th>Reason</th>
               <th>Status</th>
-              <th>Actions</th> {/* Add actions column */}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {leaveRequests.length === 0 ? (
-              <tr>
-                <td colSpan="4">No leave requests available</td>
-              </tr>
+              <tr><td colSpan="6">No pending leave requests.</td></tr>
             ) : (
               leaveRequests.map((request) => (
                 <tr key={request.id}>
-                  <td>{request.user}</td>
-                  <td>{request.type}</td>
-                  <td>{request.status}</td>
+                  <td>{request.employee.user.name}</td>
+                  <td>{request.leave_type}</td>
+                  <td>{new Date(request.start_date).toLocaleDateString()} - {new Date(request.end_date).toLocaleDateString()}</td>
+                  <td>{request.reason}</td>
+                  <td><span className="badge status-pending">{request.status}</span></td>
                   <td>
-                    {/* Approval and Rejection buttons */}
-                    {request.status === 'Pending' && (
-                      <>
-                        <button onClick={() => handleStatusChange(request.id, 'Approved')}>
-                          Approve
-                        </button>
-                        <button onClick={() => handleStatusChange(request.id, 'Rejected')}>
-                          Reject
-                        </button>
-                      </>
-                    )}
+                    <button onClick={() => handleApprove(request.id)} className="btn btn-success btn-sm me-2">Approve</button>
+                    <button onClick={() => handleReject(request.id)} className="btn btn-danger btn-sm">Reject</button>
                   </td>
                 </tr>
               ))
@@ -79,7 +84,7 @@ const LeaveRequests = () => {
           </tbody>
         </table>
       )}
-    </div>
+    </>
   );
 };
 

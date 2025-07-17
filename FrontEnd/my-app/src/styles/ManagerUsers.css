@@ -1,0 +1,144 @@
+/* Styles for the Manage Users form */
+.manage-users-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 500px;
+}
+
+.manage-users-form div {
+  display: flex;
+  flex-direction: column;
+}
+
+.manage-users-form label {
+  font-weight: bold;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #6c3483 !important;
+}
+
+.manage-users-form input,
+.manage-users-form select {
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: black !important;
+  background-color: white;
+}
+
+.manage-users-form input:focus,
+.manage-users-form select:focus {
+  border-color: #6c3483;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(108, 52, 131, 0.2);
+}
+
+.manage-users-form .submit-btn {
+  padding: 0.8rem 1.5rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  color: #6c3483 !important;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+}
+
+.manage-users-form .submit-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.manage-users-form .submit-btn:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+/* Styles for the user table */
+.user-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.btn-action {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  background-color: #0984e3;
+  color: white !important;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-action:hover {
+  background-color: #00cec9;
+}
+
+/* Styles for the upload modal */
+.upload-container {
+  margin: 1.5rem 0;
+}
+
+.btn-select-file {
+  padding: 0.7rem 1.2rem;
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  color: #6c3483 !important;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.image-preview-container {
+  margin-top: 1rem;
+}
+
+.image-preview {
+  max-width: 200px;
+  max-height: 200px;
+  margin: 0.5rem auto 0;
+  border: 2px dashed #ccc;
+  padding: 5px;
+  border-radius: 10px;
+}
+
+/* Styles for the photo capture area in the form */
+.photo-capture-area {
+  display: flex;
+  flex-direction: row !important; /* Override the column layout */
+  align-items: center;
+  gap: 1rem;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.photo-preview {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 2px dashed #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #e9ecef;
+}
+
+.photo-preview .no-photo {
+  font-size: 0.9rem;
+  color: #6c757d !important;
+}
+
+.photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

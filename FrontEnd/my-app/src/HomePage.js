@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import './App.css'; // Ensure this imports the CSS
+import './App.css';
 
 const HomePage = () => {
   return (
@@ -11,23 +11,18 @@ const HomePage = () => {
 
         <div className="features-grid">
           <div className="feature-box">
-            <a href="/clock-in-out-gps" style={{ textDecoration: 'none', color: 'inherit' }}>
-              📍 GPS-based Clock In/Out
-            </a>
+            📍 GPS-based Clock In/Out
           </div>
-          <div className="feature-box">🧠 Compliance Scoring</div>
-          <div className="feature-box">🧳 Travel Logs & Reimbursement</div>
-          <div className="feature-box">📅 Leave Management</div>
-          <div className="feature-box">🧍 Facial Recognition</div>
-          <div className="feature-box">📊 Admin Dashboard</div>
+          <div className="feature-box">📊 Compliance Scoring</div>
+          <div className="feature-box">🚗 Travel Logs & Reimbursement</div>
+          <div className="feature-box">🗓️ Leave Management</div>
+          <div className="feature-box">😀 Facial Recognition</div>
+          <div className="feature-box">⚙️ Admin Dashboard</div>
         </div>
 
         <div className="login-options">
-          <Link to="/login?role=employee">
-            <button className="login-btn employee">Login as Employee</button>
-          </Link>
-          <Link to="/login?role=admin">
-            <button className="login-btn admin">Login as Admin</button>
+          <Link to="/login">
+            <button className="login-btn employee">Login</button>
           </Link>
         </div>
       </div>
